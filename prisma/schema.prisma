@@ -6,3 +6,177 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum MeasuresTypes {
+  KILOGRAM
+  KILOMETERS
+  REPEATS
+  METERS
+  HOURS
+  MINUTES
+  SECONDS
+  CALORIES
+}
+
+enum WorkoutStatus {
+  NEW
+  IN_PROGGRES
+  DONE
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  email    String  @unique
+  password String
+  name     String?
+
+  data           UserData?
+  workouts       Workout[]
+  workouts_types WorkoutType[]
+  tags           Tags[]
+  exercises      Exercise[]
+
+  @@map("user")
+}
+
+model UserData {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  height      Int?
+  weight      Int?
+  age         Int?
+  userAvatar  String?      @map("user_avatar")
+  user        User?        @relation(fields: [user_id], references: [id])
+  user_id     Int?         @unique
+  user_photos UserPhotos[]
+
+  @@map("user_data")
+}
+
+model UserPhotos {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  photo        String
+  user_data    UserData @relation(fields: [user_data_id], references: [id])
+  user_data_id Int
+
+  @@map("user_photos")
+}
+
+model Workout {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  date      DateTime
+  status    WorkoutStatus
+  duration  Int?
+  isFavorie Boolean       @default(false) @map("is_favorite")
+  user      User?         @relation(fields: [user_id], references: [id])
+  user_id   Int?
+  type      WorkoutType?  @relation(fields: [type_id], references: [id])
+  type_id   Int           @unique
+  tags      Tags[]
+  exercises Exercise[]
+
+  @@map("workout")
+}
+
+model WorkoutType {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name      String            @unique
+  isFavorie Boolean           @default(false) @map("is_favorite")
+  icon      WorkoutTypeIcons? @relation(fields: [icon_id], references: [id])
+  icon_id   Int               @unique
+  user      User?             @relation(fields: [user_id], references: [id])
+  user_id   Int?
+  workout   Workout?
+
+  @@map("workout_type")
+}
+
+model WorkoutTypeIcons {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  icon         String
+  workout_type WorkoutType?
+
+  @@map("workout_type_icons")
+}
+
+model Tags {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name       String   @unique
+  isFavorie  Boolean  @default(false) @map("is_favorite")
+  user       User?    @relation(fields: [user_id], references: [id])
+  user_id    Int?
+  workout    Workout? @relation(fields: [workout_id], references: [id])
+  workout_id Int?
+
+  @@map("tags")
+}
+
+model Exercise {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name        String   @unique
+  description String?
+  isFavorie   Boolean  @default(false) @map("is_favorite")
+  user        User?    @relation(fields: [user_id], references: [id])
+  user_id     Int?
+  workout     Workout? @relation(fields: [workout_id], references: [id])
+  workout_id  Int?
+  sets        Set[]
+  measure     Measure? @relation(fields: [measure_id], references: [id])
+  measure_id  Int?
+
+  @@map("exercise")
+}
+
+model Set {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  exercise    Exercise? @relation(fields: [exercise_id], references: [id])
+  exercise_id Int?
+  repeats     Repeat[]
+
+  @@map("set")
+}
+
+model Repeat {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  value  Int
+  set    Set? @relation(fields: [set_id], references: [id])
+  set_id Int
+}
+
+model Measure {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  type     MeasuresTypes @unique
+  exercise Exercise[]
+}
