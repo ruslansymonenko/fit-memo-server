@@ -1,28 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { AuthDto } from './dto/auth.dto';
+import { Response } from 'express';
 
 interface IAuthService {
-  login(): void;
-  register(): void;
-  refreshTokens(): void;
-  createTokens(): void;
-  addRefreshTokenToResponse(): void;
-  removeRefreshTokenFromResponse(): void;
-  validateUser(): void;
+  login(dto: AuthDto): void;
+  register(dto: AuthDto): void;
+  getNewTokens(refreshToken: string): void;
+  createTokens(userId: string): void;
+  addRefreshTokenToResponse(res: Response, refreshToken: string): void;
+  removeRefreshTokenFromResponse(res: Response): void;
+  validateUser(dto: AuthDto): void;
 }
 
 @Injectable()
 export class AuthService implements IAuthService {
-  login(): void {}
+  login(dto: AuthDto): void {}
 
-  register(): void {}
+  register(dto: AuthDto): void {}
 
-  refreshTokens(): void {}
+  getNewTokens(refreshToken: string): void {}
 
-  createTokens(): void {}
+  createTokens(userId: string): void {}
 
-  addRefreshTokenToResponse(): void {}
+  addRefreshTokenToResponse(res: Response, refreshToken: string): void {}
 
-  removeRefreshTokenFromResponse(): void {}
+  removeRefreshTokenFromResponse(res: Response): void {}
 
-  validateUser(): void {}
+  validateUser(dto: AuthDto): void {}
 }
