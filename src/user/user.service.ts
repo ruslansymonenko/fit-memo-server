@@ -3,17 +3,16 @@ import { User } from '@prisma/client';
 import { UserDto } from './dto/user.dto';
 import { hash } from 'argon2';
 import { PrismaService } from '../prisma.service';
-import { returnUserObject } from './return-user.object';
 
 interface IUserService {
-  create(dto: UserDto): Promise<Partial<User> | null>;
+  create(dto: UserDto): Promise<User | null>;
 }
 
 @Injectable()
 export class UserService implements IUserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: UserDto): Promise<Partial<User> | null> {
+  async create(dto: UserDto): Promise<User | null> {
     const isUser = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -27,7 +26,6 @@ export class UserService implements IUserService {
         email: dto.email,
         password: await hash(dto.password),
       },
-      select: returnUserObject,
     });
 
     if (!user) return null;

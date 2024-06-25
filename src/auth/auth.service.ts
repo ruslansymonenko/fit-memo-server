@@ -3,7 +3,7 @@ import { AuthDto } from './dto/auth.dto';
 import { Response } from 'express';
 import { PrismaService } from '../prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { IAuthResponse, ITokens } from '../types/auth.types';
+import { ITokens } from '../types/auth.types';
 import { UserService } from '../user/user.service';
 import { User } from '@prisma/client';
 
@@ -15,13 +15,17 @@ interface IAuthService {
   addRefreshTokenToResponse(res: Response, refreshToken: string): void;
   removeRefreshTokenFromResponse(res: Response): void;
   validateUser(dto: AuthDto): void;
+  returnUserFields(user: User): IUserAuthData;
+}
+
+export interface IUserAuthData {
+  id: number;
+  email: string;
+  createdAt: Date;
 }
 
 export interface IAuthServiceResponse {
-  user: {
-    email: string;
-    createdAt: Date;
-  };
+  user: IUserAuthData;
   accessToken: string;
   refreshToken: string;
 }
@@ -48,17 +52,14 @@ export class AuthService implements IAuthService {
 
     if (isUser) throw new BadRequestException('User already exists');
 
-    const newUser: Partial<User> | null = await this.userSevice.create(dto);
+    const newUser: User | null = await this.userSevice.create(dto);
 
     if (!newUser) throw new BadGatewayException('User was not created, please try later');
 
-    const tokens = this.createTokens(newUser.id);
+    const tokens: ITokens = this.createTokens(newUser.id);
 
     return {
-      user: {
-        email: newUser.email,
-        createdAt: newUser.createdAt,
-      },
+      user: this.returnUserFields(newUser),
       ...tokens,
     };
   }
@@ -101,4 +102,12 @@ export class AuthService implements IAuthService {
   }
 
   validateUser(dto: AuthDto): void {}
+
+  returnUserFields(user: User): IUserAuthData {
+    return {
+      id: user.id,
+      email: user.email,
+      createdAt: user.createdAt,
+    };
+  }
 }
