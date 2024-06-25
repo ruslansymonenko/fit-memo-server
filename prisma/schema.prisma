@@ -170,6 +170,8 @@ model Repeat {
   value  Int
   set    Set? @relation(fields: [set_id], references: [id])
   set_id Int
+
+  @@map("repeat")
 }
 
 model Measure {
@@ -179,4 +181,6 @@ model Measure {
 
   type     MeasuresTypes @unique
   exercise Exercise[]
+
+  @@map("measure")
 }
