@@ -33,11 +33,12 @@ model User {
   password String
   name     String? @default("User")
 
-  data           UserData?
-  workouts       Workout[]
-  workouts_types WorkoutType[]
-  tags           Tags[]
-  exercises      Exercise[]
+  data UserData?
+
+  workouts      Workout[]
+  workoutsTypes WorkoutType[]
+  tags          Tags[]
+  exercises     Exercise[]
 
   @@map("user")
 }
@@ -47,13 +48,15 @@ model UserData {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  height      Int?
-  weight      Int?
-  age         Int?
-  userAvatar  String?      @map("user_avatar")
-  user        User?        @relation(fields: [user_id], references: [id])
-  user_id     Int?         @unique
-  user_photos UserPhotos[]
+  height Int?
+  weight Int?
+  age    Int?
+
+  userAvatar String? @map("user_avatar")
+  user       User?   @relation(fields: [userId], references: [id])
+  userId     Int?    @unique @map("user_id")
+
+  userPhotos UserPhotos[]
 
   @@map("user_data")
 }
@@ -63,9 +66,10 @@ model UserPhotos {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  photo        String
-  user_data    UserData @relation(fields: [user_data_id], references: [id])
-  user_data_id Int
+  photo String
+
+  userData   UserData @relation(fields: [userDataId], references: [id])
+  userDataId Int      @map("user_data_id")
 
   @@map("user_photos")
 }
@@ -75,14 +79,17 @@ model Workout {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  name      String
   date      DateTime
   status    WorkoutStatus
   duration  Int?
   isFavorie Boolean       @default(false) @map("is_favorite")
-  user      User?         @relation(fields: [user_id], references: [id])
-  user_id   Int?
-  type      WorkoutType?  @relation(fields: [type_id], references: [id])
-  type_id   Int           @unique
+
+  user          User?        @relation(fields: [userId], references: [id])
+  userId        Int?         @map("user_id")
+  workoutType   WorkoutType? @relation(fields: [workoutTypeId], references: [id])
+  workoutTypeId Int?         @map("workout_type_id")
+
   tags      Tags[]
   exercises Exercise[]
 
@@ -94,13 +101,15 @@ model WorkoutType {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  name      String            @unique
-  isFavorie Boolean           @default(false) @map("is_favorite")
-  icon      WorkoutTypeIcons? @relation(fields: [icon_id], references: [id])
-  icon_id   Int               @unique
-  user      User?             @relation(fields: [user_id], references: [id])
-  user_id   Int?
-  workout   Workout?
+  name      String  @unique
+  isFavorie Boolean @default(false) @map("is_favorite")
+
+  user               User?             @relation(fields: [userId], references: [id])
+  userId             Int?              @map("user_id")
+  workoutTypeIcons   WorkoutTypeIcons? @relation(fields: [workoutTypeIconsId], references: [id])
+  workoutTypeIconsId Int?              @map("workout_type_icons_id")
+
+  workouts Workout[]
 
   @@map("workout_type")
 }
@@ -110,8 +119,9 @@ model WorkoutTypeIcons {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  icon         String
-  workout_type WorkoutType?
+  icon String
+
+  workoutTypes WorkoutType[]
 
   @@map("workout_type_icons")
 }
@@ -121,12 +131,13 @@ model Tags {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  name       String   @unique
-  isFavorie  Boolean  @default(false) @map("is_favorite")
-  user       User?    @relation(fields: [user_id], references: [id])
-  user_id    Int?
-  workout    Workout? @relation(fields: [workout_id], references: [id])
-  workout_id Int?
+  name      String  @unique
+  isFavorie Boolean @default(false) @map("is_favorite")
+
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?     @map("user_id")
+  workout   Workout? @relation(fields: [workoutId], references: [id])
+  workoutId Int?     @map("workout_id")
 
   @@map("tags")
 }
@@ -136,16 +147,18 @@ model Exercise {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  name        String   @unique
+  name        String  @unique
   description String?
-  isFavorie   Boolean  @default(false) @map("is_favorite")
-  user        User?    @relation(fields: [user_id], references: [id])
-  user_id     Int?
-  workout     Workout? @relation(fields: [workout_id], references: [id])
-  workout_id  Int?
-  sets        Set[]
-  measure     Measure? @relation(fields: [measure_id], references: [id])
-  measure_id  Int?
+  isFavorie   Boolean @default(false) @map("is_favorite")
+
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?     @map("user_id")
+  workout   Workout? @relation(fields: [workoutId], references: [id])
+  workoutId Int?     @map("workout_id")
+  measure   Measure? @relation(fields: [measureId], references: [id])
+  measureId Int?     @map("measure_id")
+
+  sets Set[]
 
   @@map("exercise")
 }
@@ -155,9 +168,10 @@ model Set {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  exercise    Exercise? @relation(fields: [exercise_id], references: [id])
-  exercise_id Int?
-  repeats     Repeat[]
+  exercise   Exercise? @relation(fields: [exerciseId], references: [id])
+  exerciseId Int?      @map("exercise_id")
+
+  repeats Repeat[]
 
   @@map("set")
 }
@@ -167,9 +181,9 @@ model Repeat {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  value  Int
-  set    Set? @relation(fields: [set_id], references: [id])
-  set_id Int
+  value Int
+  set   Set? @relation(fields: [setId], references: [id])
+  setId Int  @map("set_id")
 
   @@map("repeat")
 }
