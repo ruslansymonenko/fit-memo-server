@@ -10,7 +10,7 @@ import { getJwtConfig } from '../config/jwt.config';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, PrismaService, UserService, JwtStrategy],
+  providers: [AuthService, ConfigService, PrismaService, UserService, JwtStrategy],
   imports: [
     ConfigModule,
     JwtModule.registerAsync({

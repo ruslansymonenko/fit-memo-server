@@ -1,4 +1,10 @@
-import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import { Response } from 'express';
 import { PrismaService } from '../prisma.service';
@@ -6,15 +12,17 @@ import { JwtService } from '@nestjs/jwt';
 import { ITokens } from '../types/auth.types';
 import { UserService } from '../user/user.service';
 import { User } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { verify } from 'argon2';
 
 interface IAuthService {
-  login(dto: AuthDto): void;
+  login(dto: AuthDto): Promise<IAuthServiceResponse>;
   register(dto: AuthDto): Promise<IAuthServiceResponse>;
-  getNewTokens(refreshToken: string): void;
-  createTokens(userId: number): ITokens;
+  getNewTokens(refreshToken: string): Promise<IAuthServiceResponse>;
+  createTokens(userId: number): Promise<ITokens>;
   addRefreshTokenToResponse(res: Response, refreshToken: string): void;
   removeRefreshTokenFromResponse(res: Response): void;
-  validateUser(dto: AuthDto): void;
+  validateUser(dto: AuthDto): Promise<User | null>;
   returnUserFields(user: User): IUserAuthData;
 }
 
@@ -37,11 +45,23 @@ export class AuthService implements IAuthService {
 
   constructor(
     private prisma: PrismaService,
+    private configService: ConfigService,
     private jwt: JwtService,
-    private userSevice: UserService,
+    private userService: UserService,
   ) {}
 
-  login(dto: AuthDto): void {}
+  async login(dto: AuthDto): Promise<IAuthServiceResponse> {
+    const user = await this.validateUser(dto);
+
+    if (!user) throw new BadRequestException('Wrong data!');
+
+    const tokens: ITokens = await this.createTokens(user.id);
+
+    return {
+      user: this.returnUserFields(user),
+      ...tokens,
+    };
+  }
 
   async register(dto: AuthDto): Promise<IAuthServiceResponse> {
     const isUser = await this.prisma.user.findUnique({
@@ -52,11 +72,11 @@ export class AuthService implements IAuthService {
 
     if (isUser) throw new BadRequestException('User already exists');
 
-    const newUser: User | null = await this.userSevice.create(dto);
+    const newUser: User | null = await this.userService.create(dto);
 
     if (!newUser) throw new BadGatewayException('User was not created, please try later');
 
-    const tokens: ITokens = this.createTokens(newUser.id);
+    const tokens: ITokens = await this.createTokens(newUser.id);
 
     return {
       user: this.returnUserFields(newUser),
@@ -64,10 +84,34 @@ export class AuthService implements IAuthService {
     };
   }
 
-  getNewTokens(refreshToken: string): void {}
+  async getNewTokens(refreshToken: string): Promise<IAuthServiceResponse> {
+    let result;
+    try {
+      result = await this.jwt.verifyAsync(refreshToken);
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      } else {
+        throw error;
+      }
+    }
 
-  createTokens(userId: number): ITokens {
-    const data = { id: userId };
+    if (!result) throw new UnauthorizedException('Invalid token');
+
+    const isUser = await this.userService.findById(result.id);
+
+    if (!isUser) throw new NotFoundException('User not found');
+
+    const tokens = await this.createTokens(isUser.id);
+
+    return {
+      user: this.returnUserFields(isUser),
+      ...tokens,
+    };
+  }
+
+  async createTokens(userId: number): Promise<ITokens> {
+    const data: { id: number } = { id: userId };
 
     const accessToken: string = this.jwt.sign(data, { expiresIn: '1h' });
     const refreshToken: string = this.jwt.sign(data, { expiresIn: '7d' });
@@ -82,7 +126,7 @@ export class AuthService implements IAuthService {
 
     res.cookie(this.REFRESH_TOKEN_NAME, refreshToken, {
       httpOnly: true,
-      domain: 'localhost',
+      domain: this.configService.get('SERVER_DOMAIN'),
       expires: expiresIn,
       secure: true,
       //lax if production
@@ -93,7 +137,7 @@ export class AuthService implements IAuthService {
   removeRefreshTokenFromResponse(res: Response): void {
     res.cookie(this.REFRESH_TOKEN_NAME, '', {
       httpOnly: true,
-      domain: 'localhost',
+      domain: this.configService.get('SERVER_DOMAIN'),
       expires: new Date(0),
       secure: true,
       //lax if production
@@ -101,7 +145,21 @@ export class AuthService implements IAuthService {
     });
   }
 
-  validateUser(dto: AuthDto): void {}
+  async validateUser(dto: AuthDto): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const isValid = await verify(user.password, dto.password);
+
+    if (!isValid) throw new UnauthorizedException('Invalid password');
+
+    return user;
+  }
 
   returnUserFields(user: User): IUserAuthData {
     return {
