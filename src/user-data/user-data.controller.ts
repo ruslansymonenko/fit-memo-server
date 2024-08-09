@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -28,15 +29,22 @@ export class UserDataController {
     return this.userDataService.create(userId, dto);
   }
 
+  @Auth()
+  @Get('by-user-id')
+  async getById(@CurrentUser('id') id: number) {
+    const { password, ...user } = await this.userDataService.getByUserId(id);
+
+    return { ...user };
+  }
+
   @HttpCode(200)
   @UseInterceptors(FilesInterceptor('files'))
   @Auth()
-  @Put('update/avatar/:userDataId')
+  @Put('update/avatar')
   async updateAvatar(
     @CurrentUser('id') userId: number,
-    @Param('userDataId') userDataId: string,
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.userDataService.updateAvatar(parseInt(userDataId), userId, files);
+    return this.userDataService.updateAvatar(userId, files);
   }
 }

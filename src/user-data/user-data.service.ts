@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { UserData } from '@prisma/client';
+import { User, UserData } from '@prisma/client';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma.service';
 import { UserDataDto } from './dto/user-data.dto';
@@ -71,12 +71,24 @@ export class UserDataService implements IUserDataService {
     return userData;
   }
 
-  async updateAvatar(
-    userDataId: number,
-    userId: number,
-    file: Express.Multer.File[],
-  ): Promise<UserData | null> {
-    const userData = await this.getById(userDataId);
+  async getByUserId(userId: number): Promise<(User & { data: UserData | null }) | null> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        data: true,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User data not found');
+
+    return user;
+  }
+
+  async updateAvatar(userId: number, file: Express.Multer.File[]): Promise<UserData | null> {
+    const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
+    const userData = userInfo?.data;
 
     if (!userData) throw new BadRequestException('User data not found');
 
@@ -86,7 +98,7 @@ export class UserDataService implements IUserDataService {
 
     const updatedUserData = await this.prisma.userData.update({
       where: {
-        id: userDataId,
+        id: userData.id,
       },
       data: {
         userAvatar: avatarPath,
