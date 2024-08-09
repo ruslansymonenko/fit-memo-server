@@ -16,7 +16,6 @@ import { Auth } from '../auth/decorators/auth.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { UserDataDto } from './dto/user-data.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { EnumUserRoles } from '@prisma/client';
 
 @Controller('user-data')
 export class UserDataController {
