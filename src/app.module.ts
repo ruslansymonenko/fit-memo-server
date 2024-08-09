@@ -10,6 +10,8 @@ import { ExerciseModule } from './exercise/exercise.module';
 import { SetModule } from './set/set.module';
 import { RepeatModule } from './repeat/repeat.module';
 import { MeasureModule } from './measure/measure.module';
+import { UserDataModule } from './user-data/user-data.module';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -26,6 +28,8 @@ import { MeasureModule } from './measure/measure.module';
     SetModule,
     RepeatModule,
     MeasureModule,
+    UserDataModule,
+    FileModule,
   ],
   controllers: [],
   providers: [],

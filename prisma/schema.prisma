@@ -48,13 +48,13 @@ model UserData {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  height Int?
-  weight Int?
-  age    Int?
+  height     Int?
+  weight     Int?
+  age        Int?
+  userAvatar String? @default("/uploads/avatars/user-avatar.png") @map("user_avatar")
 
-  userAvatar String? @map("user_avatar")
-  user       User?   @relation(fields: [userId], references: [id])
-  userId     Int?    @unique @map("user_id")
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @unique @map("user_id")
 
   userPhotos UserPhotos[]
 
