@@ -10,7 +10,7 @@ import { Response } from 'express';
 import { PrismaService } from '../prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ITokens } from '../types/auth.types';
-import { UserService } from '../user/user.service';
+import { IUserReturnInfo, UserService } from '../user/user.service';
 import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { verify } from 'argon2';
@@ -23,17 +23,11 @@ interface IAuthService {
   addRefreshTokenToResponse(res: Response, refreshToken: string): void;
   removeRefreshTokenFromResponse(res: Response): void;
   validateUser(dto: AuthDto): Promise<User | null>;
-  returnUserFields(user: User): IUserAuthData;
-}
-
-export interface IUserAuthData {
-  id: number;
-  email: string;
-  createdAt: Date;
+  returnUserFields(user: User): IUserReturnInfo;
 }
 
 export interface IAuthServiceResponse {
-  user: IUserAuthData;
+  user: IUserReturnInfo;
   accessToken: string;
   refreshToken: string;
 }
@@ -111,7 +105,8 @@ export class AuthService implements IAuthService {
   }
 
   async createTokens(userId: number): Promise<ITokens> {
-    const data: { id: number } = { id: userId };
+    const user = await this.userService.findById(userId);
+    const data: { id: number; role: string } = { id: userId, role: user.userRole };
 
     const accessToken: string = this.jwt.sign(data, { expiresIn: '1h' });
     const refreshToken: string = this.jwt.sign(data, { expiresIn: '7d' });
@@ -161,10 +156,11 @@ export class AuthService implements IAuthService {
     return user;
   }
 
-  returnUserFields(user: User): IUserAuthData {
+  returnUserFields(user: User): IUserReturnInfo {
     return {
       id: user.id,
       email: user.email,
+      name: user.name,
       createdAt: user.createdAt,
     };
   }

@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum MeasuresTypes {
+enum EnumMeasuresTypes {
   KILOGRAM
   KILOMETERS
   REPEATS
@@ -18,10 +18,16 @@ enum MeasuresTypes {
   CALORIES
 }
 
-enum WorkoutStatus {
+enum EnumWorkoutStatus {
   NEW
   IN_PROGGRES
   DONE
+}
+
+enum EnumUserRoles {
+  ADMIN
+  MANAGER
+  USER
 }
 
 model User {
@@ -29,9 +35,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  email    String  @unique
+  email    String        @unique
   password String
-  name     String? @default("User")
+  name     String?       @default("User")
+  userRole EnumUserRoles @default(USER) @map("user_role")
 
   data UserData?
 
@@ -48,13 +55,13 @@ model UserData {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  height Int?
-  weight Int?
-  age    Int?
+  height     Int?
+  weight     Int?
+  age        Int?
+  userAvatar String? @default("/uploads/avatars/user-avatar.png") @map("user_avatar")
 
-  userAvatar String? @map("user_avatar")
-  user       User?   @relation(fields: [userId], references: [id])
-  userId     Int?    @unique @map("user_id")
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @unique @map("user_id")
 
   userPhotos UserPhotos[]
 
@@ -80,10 +87,10 @@ model Workout {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   name      String
-  date      DateTime
-  status    WorkoutStatus
+  date      DateTime          @default(now())
+  status    EnumWorkoutStatus
   duration  Int?
-  isFavorie Boolean       @default(false) @map("is_favorite")
+  isFavorie Boolean           @default(false) @map("is_favorite")
 
   user          User?        @relation(fields: [userId], references: [id])
   userId        Int?         @map("user_id")
@@ -193,7 +200,7 @@ model Measure {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  type     MeasuresTypes @unique
+  type     EnumMeasuresTypes @unique
   exercise Exercise[]
 
   @@map("measure")

@@ -14,4 +14,9 @@ export class AuthDto {
     message: 'Password should be at least 6 characters',
   })
   password: string;
+
+  @IsString({
+    message: 'Name is required',
+  })
+  name: string;
 }
