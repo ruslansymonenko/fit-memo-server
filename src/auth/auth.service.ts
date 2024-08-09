@@ -105,7 +105,8 @@ export class AuthService implements IAuthService {
   }
 
   async createTokens(userId: number): Promise<ITokens> {
-    const data: { id: number } = { id: userId };
+    const user = await this.userService.findById(userId);
+    const data: { id: number; role: string } = { id: userId, role: user.userRole };
 
     const accessToken: string = this.jwt.sign(data, { expiresIn: '1h' });
     const refreshToken: string = this.jwt.sign(data, { expiresIn: '7d' });

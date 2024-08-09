@@ -8,9 +8,10 @@ import { EnumFoldersNames, FileService } from '../file/file.service';
 interface IUserDataService {
   create(userId: number, dto: UserDataDto): Promise<UserData | null>;
   getById(id: number): Promise<UserData | null>;
-  // getByUserId(userID: number): Promise<UserData | null>;
+  getByUserId(userID: number): Promise<(User & { data: UserData | null }) | null>;
   update(userDataId: number, dto: UserDataDto): Promise<IUserDataReturnInfo | null>;
-  // delete(userDataId: number): Promise<UserData | null>;
+  updateAvatar(userId: number, file: Express.Multer.File[]): Promise<UserData | null>;
+  delete(userId: number): Promise<UserData | null>;
 }
 
 export interface IUserDataReturnInfo {}
@@ -28,6 +29,10 @@ export class UserDataService implements IUserDataService {
 
     if (!user) throw new BadRequestException('User not found');
 
+    const isUserDataExist = await this.getByUserId(user.id);
+
+    if (isUserDataExist.data) throw new BadRequestException('User data already exist');
+
     const userData = await this.prisma.userData.create({
       data: {
         height: dto.height,
@@ -35,23 +40,6 @@ export class UserDataService implements IUserDataService {
         age: dto.age,
         userId: user.id,
       },
-    });
-
-    if (!userData) throw new NotFoundException('Server error');
-
-    return userData;
-  }
-
-  async update(userId: number, dto: UserDataDto): Promise<UserData | null> {
-    const user = await this.userService.findById(userId);
-
-    if (!user) throw new BadRequestException('User not found');
-
-    const userData = await this.prisma.userData.update({
-      where: {
-        id: userId,
-      },
-      data: dto,
     });
 
     if (!userData) throw new NotFoundException('Server error');
@@ -86,6 +74,23 @@ export class UserDataService implements IUserDataService {
     return user;
   }
 
+  async update(userId: number, dto: UserDataDto): Promise<UserData | null> {
+    const user = await this.userService.findById(userId);
+
+    if (!user) throw new BadRequestException('User not found');
+
+    const userData = await this.prisma.userData.update({
+      where: {
+        id: userId,
+      },
+      data: dto,
+    });
+
+    if (!userData) throw new NotFoundException('Server error');
+
+    return userData;
+  }
+
   async updateAvatar(userId: number, file: Express.Multer.File[]): Promise<UserData | null> {
     const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
     const userData = userInfo?.data;
@@ -108,5 +113,18 @@ export class UserDataService implements IUserDataService {
     if (!userData) throw new NotFoundException('Server error');
 
     return userData;
+  }
+
+  async delete(userId: number) {
+    const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
+    const userData = userInfo?.data;
+
+    if (!userData) throw new BadRequestException('User data not found');
+
+    return this.prisma.userData.delete({
+      where: {
+        id: userData.id,
+      },
+    });
   }
 }
