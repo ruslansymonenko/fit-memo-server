@@ -99,7 +99,6 @@ export class UserDataService implements IUserDataService {
 
     const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.AVATARS, userId);
     const avatarPath = fileData[0].url;
-    console.log(avatarPath);
 
     const updatedUserData = await this.prisma.userData.update({
       where: {

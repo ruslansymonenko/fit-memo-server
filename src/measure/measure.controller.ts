@@ -28,7 +28,7 @@ export class MeasureController {
   }
 
   @HttpCode(200)
-  @Auth(EnumUserRoles.ADMIN)
+  @Auth()
   @Get('by-id/:id')
   async getById(@Param('id') id: string) {
     return this.measureService.getById(parseInt(id));
