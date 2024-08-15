@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { path } from 'app-root-path';
 import { ensureDir, writeFile } from 'fs-extra';
 import slugify from 'slugify';
@@ -32,8 +32,6 @@ export class FileService {
     folder: EnumFoldersNames,
     userId?: number,
   ): Promise<IFileResponse[]> {
-    console.log(files);
-
     if (!Object.values(EnumFoldersNames).includes(folder)) {
       throw new BadRequestException(`Invalid folder name: ${folder}`);
     }
@@ -46,21 +44,25 @@ export class FileService {
 
     await ensureDir(uploadPath);
 
-    const response: IFileResponse[] = await Promise.all(
-      files.map(async (file) => {
-        const fileName = this.getFileName(file.originalname);
-        const filePath = `${uploadPath}/${fileName}`;
+    try {
+      const response: IFileResponse[] = await Promise.all(
+        files.map(async (file) => {
+          const fileName = this.getFileName(file.originalname);
+          const filePath = `${uploadPath}/${fileName}`;
 
-        await writeFile(filePath, file.buffer);
+          await writeFile(filePath, file.buffer);
 
-        return {
-          url: filePath.replace(`${path}/`, ''),
-          name: fileName,
-        };
-      }),
-    );
+          return {
+            url: filePath.replace(`${path}/`, ''),
+            name: fileName,
+          };
+        }),
+      );
 
-    return response;
+      return response;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   private getUploadPath(folder: EnumFoldersNames, userId?: number): string {

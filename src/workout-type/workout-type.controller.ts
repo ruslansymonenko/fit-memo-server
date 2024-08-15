@@ -10,49 +10,49 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { WorkoutService } from './workout.service';
+import { WorkoutTypeService } from './workout-type.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { WorkoutDto, WorkoutUpdateDto } from './dto/workout.dto';
+import { WorkoutTypeDto } from './dto/workout-type.dto';
 
-@Controller('workout')
-export class WorkoutController {
-  constructor(private readonly workoutService: WorkoutService) {}
+@Controller('workout-type')
+export class WorkoutTypeController {
+  constructor(private readonly workoutTypeService: WorkoutTypeService) {}
 
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Post('create')
-  async create(@CurrentUser('id') userId: number, @Body() dto: WorkoutDto) {
-    return this.workoutService.create(userId, dto);
+  async create(@CurrentUser('id') userId: number, @Body() dto: WorkoutTypeDto) {
+    return this.workoutTypeService.create(userId, dto);
   }
 
   @HttpCode(200)
   @Auth()
   @Get('by-id/:id')
   async getById(@Param('id') id: string) {
-    return this.workoutService.getById(parseInt(id));
+    return this.workoutTypeService.getById(parseInt(id));
   }
 
   @HttpCode(200)
   @Auth()
   @Get('get-all')
   async getAll(@CurrentUser('id') userId: number) {
-    return this.workoutService.getAll(userId);
+    return this.workoutTypeService.getAll(userId);
   }
 
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth()
   @Put('update/:id')
-  async update(@Param('id') id: string, @Body() dto: WorkoutUpdateDto) {
-    return this.workoutService.update(parseInt(id), dto);
+  async update(@Param('id') id: string, @Body() dto: WorkoutTypeDto) {
+    return this.workoutTypeService.update(parseInt(id), dto);
   }
 
   @HttpCode(200)
   @Auth()
   @Delete('delete/:id')
   async delete(@Param('id') id: string) {
-    return this.workoutService.delete(parseInt(id));
+    return this.workoutTypeService.delete(parseInt(id));
   }
 }

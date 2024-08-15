@@ -12,6 +12,8 @@ import { RepeatModule } from './repeat/repeat.module';
 import { MeasureModule } from './measure/measure.module';
 import { UserDataModule } from './user-data/user-data.module';
 import { FileModule } from './file/file.module';
+import { WorkoutTypeIconsModule } from './workout-type-icons/workout-type-icons.module';
+import { WorkoutTypeModule } from './workout-type/workout-type.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { FileModule } from './file/file.module';
     MeasureModule,
     UserDataModule,
     FileModule,
+    WorkoutTypeIconsModule,
+    WorkoutTypeModule,
   ],
   controllers: [],
   providers: [],

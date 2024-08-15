@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { User, UserData } from '@prisma/client';
 import { UserService } from '../user/user.service';
 import { PrismaService } from '../prisma.service';
@@ -25,106 +30,129 @@ export class UserDataService implements IUserDataService {
   ) {}
 
   async create(userId: number, dto: UserDataDto): Promise<UserData | null> {
-    const user = await this.userService.findById(userId);
+    try {
+      const user = await this.userService.findById(userId);
 
-    if (!user) throw new BadRequestException('User not found');
+      if (!user) throw new BadRequestException('User not found');
 
-    const isUserDataExist = await this.getByUserId(user.id);
+      const isUserDataExist = await this.getByUserId(user.id);
 
-    if (isUserDataExist.data) throw new BadRequestException('User data already exist');
+      if (isUserDataExist.data) throw new BadRequestException('User data already exist');
 
-    const userData = await this.prisma.userData.create({
-      data: {
-        height: dto.height,
-        weight: dto.weight,
-        age: dto.age,
-        userId: user.id,
-      },
-    });
+      const userData = await this.prisma.userData.create({
+        data: {
+          height: dto.height,
+          weight: dto.weight,
+          age: dto.age,
+          userId: user.id,
+        },
+      });
 
-    if (!userData) throw new NotFoundException('Server error');
+      if (!userData) throw new NotFoundException('Server error');
 
-    return userData;
+      return userData;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async getById(id: number): Promise<UserData | null> {
-    const userData = await this.prisma.userData.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    try {
+      const userData = await this.prisma.userData.findUnique({
+        where: {
+          id: id,
+        },
+      });
 
-    if (!userData) throw new NotFoundException('User data not found');
+      if (!userData) throw new NotFoundException('User data not found');
 
-    return userData;
+      return userData;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async getByUserId(userId: number): Promise<(User & { data: UserData | null }) | null> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-      include: {
-        data: true,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        include: {
+          data: true,
+        },
+      });
 
-    if (!user) throw new NotFoundException('User data not found');
+      if (!user) throw new NotFoundException('User data not found');
 
-    return user;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async update(userId: number, dto: UserDataDto): Promise<UserData | null> {
-    const user = await this.userService.findById(userId);
+    try {
+      const user = await this.userService.findById(userId);
 
-    if (!user) throw new BadRequestException('User not found');
+      if (!user) throw new BadRequestException('User not found');
 
-    const userData = await this.prisma.userData.update({
-      where: {
-        id: userId,
-      },
-      data: dto,
-    });
+      const userData = await this.prisma.userData.update({
+        where: {
+          id: userId,
+        },
+        data: dto,
+      });
 
-    if (!userData) throw new NotFoundException('Server error');
+      if (!userData) throw new NotFoundException('Server error');
 
-    return userData;
+      return userData;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async updateAvatar(userId: number, file: Express.Multer.File[]): Promise<UserData | null> {
-    const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
-    const userData = userInfo?.data;
+    try {
+      const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
+      const userData = userInfo?.data;
 
-    if (!userData) throw new BadRequestException('User data not found');
+      if (!userData) throw new BadRequestException('User data not found');
 
-    const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.AVATARS, userId);
-    const avatarPath = fileData[0].url;
-    console.log(avatarPath);
+      const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.AVATARS, userId);
+      const avatarPath = fileData[0].url;
 
-    const updatedUserData = await this.prisma.userData.update({
-      where: {
-        id: userData.id,
-      },
-      data: {
-        userAvatar: avatarPath,
-      },
-    });
+      const updatedUserData = await this.prisma.userData.update({
+        where: {
+          id: userData.id,
+        },
+        data: {
+          userAvatar: avatarPath,
+        },
+      });
 
-    if (!userData) throw new NotFoundException('Server error');
+      if (!userData) throw new NotFoundException('Server error');
 
-    return userData;
+      return userData;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async delete(userId: number) {
-    const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
-    const userData = userInfo?.data;
+    try {
+      const userInfo: User & { data: UserData | null } = await this.getByUserId(userId);
+      const userData = userInfo?.data;
 
-    if (!userData) throw new BadRequestException('User data not found');
+      if (!userData) throw new BadRequestException('User data not found');
 
-    return this.prisma.userData.delete({
-      where: {
-        id: userData.id,
-      },
-    });
+      return this.prisma.userData.delete({
+        where: {
+          id: userData.id,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 }

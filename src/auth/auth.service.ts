@@ -2,6 +2,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -45,37 +46,45 @@ export class AuthService implements IAuthService {
   ) {}
 
   async login(dto: AuthDto): Promise<IAuthServiceResponse> {
-    const user = await this.validateUser(dto);
+    try {
+      const user = await this.validateUser(dto);
 
-    if (!user) throw new BadRequestException('Wrong data!');
+      if (!user) throw new BadRequestException('Wrong data!');
 
-    const tokens: ITokens = await this.createTokens(user.id);
+      const tokens: ITokens = await this.createTokens(user.id);
 
-    return {
-      user: this.returnUserFields(user),
-      ...tokens,
-    };
+      return {
+        user: this.returnUserFields(user),
+        ...tokens,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async register(dto: AuthDto): Promise<IAuthServiceResponse> {
-    const isUser = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
+    try {
+      const isUser = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
 
-    if (isUser) throw new BadRequestException('User already exists');
+      if (isUser) throw new BadRequestException('User already exists');
 
-    const newUser: User | null = await this.userService.create(dto);
+      const newUser: User | null = await this.userService.create(dto);
 
-    if (!newUser) throw new BadGatewayException('User was not created, please try later');
+      if (!newUser) throw new BadGatewayException('User was not created, please try later');
 
-    const tokens: ITokens = await this.createTokens(newUser.id);
+      const tokens: ITokens = await this.createTokens(newUser.id);
 
-    return {
-      user: this.returnUserFields(newUser),
-      ...tokens,
-    };
+      return {
+        user: this.returnUserFields(newUser),
+        ...tokens,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async getNewTokens(refreshToken: string): Promise<IAuthServiceResponse> {
@@ -105,13 +114,17 @@ export class AuthService implements IAuthService {
   }
 
   async createTokens(userId: number): Promise<ITokens> {
-    const user = await this.userService.findById(userId);
-    const data: { id: number; role: string } = { id: userId, role: user.userRole };
+    try {
+      const user = await this.userService.findById(userId);
+      const data: { id: number; role: string } = { id: userId, role: user.userRole };
 
-    const accessToken: string = this.jwt.sign(data, { expiresIn: '1h' });
-    const refreshToken: string = this.jwt.sign(data, { expiresIn: '7d' });
+      const accessToken: string = this.jwt.sign(data, { expiresIn: '1h' });
+      const refreshToken: string = this.jwt.sign(data, { expiresIn: '7d' });
 
-    return { accessToken, refreshToken };
+      return { accessToken, refreshToken };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   addRefreshTokenToResponse(res: Response, refreshToken: string): void {
@@ -141,19 +154,23 @@ export class AuthService implements IAuthService {
   }
 
   async validateUser(dto: AuthDto): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          email: dto.email,
+        },
+      });
 
-    if (!user) throw new NotFoundException('User not found');
+      if (!user) throw new NotFoundException('User not found');
 
-    const isValid = await verify(user.password, dto.password);
+      const isValid = await verify(user.password, dto.password);
 
-    if (!isValid) throw new UnauthorizedException('Invalid password');
+      if (!isValid) throw new UnauthorizedException('Invalid password');
 
-    return user;
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   returnUserFields(user: User): IUserReturnInfo {
