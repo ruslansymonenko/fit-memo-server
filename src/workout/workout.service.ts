@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { Prisma, Workout } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { WorkoutDto, WorkoutUpdateDto } from './dto/workout.dto';
+import { AddTagsDto } from './dto/addTags.dto';
 
 interface IWorkoutService {
   create(userId: number, dto: WorkoutDto): Promise<Workout | null>;
@@ -10,6 +11,8 @@ interface IWorkoutService {
   update(workoutId: number, dto: WorkoutDto): Promise<Workout | null>;
   delete(workoutId: number): Promise<Workout | null>;
 }
+
+export type TypeToggleTags = 'add' | 'remove';
 
 @Injectable()
 export class WorkoutService implements IWorkoutService {
@@ -30,6 +33,9 @@ export class WorkoutService implements IWorkoutService {
             connect: { id: dto.workoutTypeId },
           },
         },
+        include: {
+          tags: true,
+        },
       });
 
       if (!workout) throw new InternalServerErrorException('Server error');
@@ -46,6 +52,9 @@ export class WorkoutService implements IWorkoutService {
         where: {
           id: workoutId,
         },
+        include: {
+          tags: true,
+        },
       });
 
       if (!workout) throw new InternalServerErrorException('Workout was not found');
@@ -61,6 +70,9 @@ export class WorkoutService implements IWorkoutService {
       const workoutType = await this.prisma.workout.findMany({
         where: {
           userId: userId,
+        },
+        include: {
+          tags: true,
         },
       });
 
@@ -108,6 +120,12 @@ export class WorkoutService implements IWorkoutService {
         };
       }
 
+      // if (dto.tagIds !== undefined) {
+      //   updateData.tags = {
+      //     connect: dto.tagIds.map((id: number): { id: number } => ({ id })),
+      //   };
+      // }
+
       if (Object.keys(updateData).length === 0) {
         return currentWorkout;
       }
@@ -117,6 +135,9 @@ export class WorkoutService implements IWorkoutService {
           id: workoutId,
         },
         data: updateData,
+        include: {
+          tags: true,
+        },
       });
 
       if (!workoutType) throw new InternalServerErrorException('Server error');
@@ -126,6 +147,94 @@ export class WorkoutService implements IWorkoutService {
       throw new InternalServerErrorException('Failed to update Workout', error.message);
     }
   }
+
+  async toggleTags(
+    workoutId: number,
+    type: TypeToggleTags,
+    dto: AddTagsDto,
+  ): Promise<Workout | null> {
+    try {
+      const currentWorkout = await this.getById(workoutId);
+
+      if (!currentWorkout) {
+        throw new NotFoundException('Workout not found');
+      }
+
+      const updateData: Prisma.WorkoutUpdateInput = {};
+
+      if (type === 'add') {
+        if (dto.tagIds !== undefined) {
+          updateData.tags = {
+            connect: dto.tagIds.map((id: number): { id: number } => ({ id })),
+          };
+        }
+      } else if (type === 'remove') {
+        if (dto.tagIds !== undefined) {
+          updateData.tags = {
+            disconnect: dto.tagIds.map((id: number): { id: number } => ({ id })),
+          };
+        }
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return currentWorkout;
+      }
+
+      const workout = await this.prisma.workout.update({
+        where: {
+          id: workoutId,
+        },
+        data: updateData,
+        include: {
+          tags: true,
+        },
+      });
+
+      if (!workout) throw new InternalServerErrorException('Server error');
+
+      return workout;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to add tags to workout', error.message);
+    }
+  }
+
+  // async removeTags(workoutId: number, dto: AddTagsDto): Promise<Workout | null> {
+  //   try {
+  //     const currentWorkout = await this.getById(workoutId);
+  //
+  //     if (!currentWorkout) {
+  //       throw new NotFoundException('Workout not found');
+  //     }
+  //
+  //     const updateData: Prisma.WorkoutUpdateInput = {};
+  //
+  //     if (dto.tagIds !== undefined) {
+  //       updateData.tags = {
+  //         disconnect: dto.tagIds.map((id: number): { id: number } => ({ id })),
+  //       };
+  //     }
+  //
+  //     if (Object.keys(updateData).length === 0) {
+  //       return currentWorkout;
+  //     }
+  //
+  //     const workoutType = await this.prisma.workout.update({
+  //       where: {
+  //         id: workoutId,
+  //       },
+  //       data: updateData,
+  //       include: {
+  //         tags: true,
+  //       },
+  //     });
+  //
+  //     if (!workoutType) throw new InternalServerErrorException('Server error');
+  //
+  //     return workoutType;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException('Failed to update Workout', error.message);
+  //   }
+  // }
 
   async delete(workoutId: number): Promise<Workout | null> {
     try {

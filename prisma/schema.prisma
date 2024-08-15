@@ -97,8 +97,8 @@ model Workout {
   workoutType   WorkoutType? @relation(fields: [workoutTypeId], references: [id])
   workoutTypeId Int?         @map("workout_type_id")
 
-  tags      Tags[]
   exercises Exercise[]
+  tags      Tags[]
 
   @@map("workout")
 }
@@ -142,10 +142,10 @@ model Tags {
   color     String
   isFavorie Boolean @default(false) @map("is_favorite")
 
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    Int?     @map("user_id")
-  workout   Workout? @relation(fields: [workoutId], references: [id])
-  workoutId Int?     @map("workout_id")
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @map("user_id")
+
+  workouts Workout[]
 
   @@map("tags")
 }

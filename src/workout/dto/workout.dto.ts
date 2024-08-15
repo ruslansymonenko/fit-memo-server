@@ -1,4 +1,6 @@
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsBoolean,
   IsDate,
   IsEnum,
@@ -87,4 +89,10 @@ export class WorkoutUpdateDto {
   @IsOptional()
   @IsNumber({}, { message: 'Workout type id should be a number' })
   workoutTypeId: number;
+
+  @IsOptional()
+  @IsArray({})
+  @ArrayNotEmpty()
+  @IsNumber({}, { each: true })
+  tagIds: number[];
 }

@@ -73,48 +73,48 @@ export class TagsService {
     }
   }
 
-  async update(tagId: number, dto: TagsUpdateDto): Promise<Tags | null> {
-    try {
-      const currentTag = await this.getById(tagId);
-
-      if (!currentTag) {
-        throw new NotFoundException('Tag not found');
-      }
-
-      const updateData: Prisma.TagsUpdateInput = {};
-
-      if (dto.name !== undefined) {
-        updateData.name = dto.name;
-      }
-
-      if (dto.color !== undefined) {
-        updateData.color = dto.color;
-      }
-
-      if (dto.workoutId !== undefined) {
-        updateData.workout = {
-          connect: { id: dto.workoutId },
-        };
-      }
-
-      if (Object.keys(updateData).length === 0) {
-        return currentTag;
-      }
-
-      const tag = await this.prisma.tags.update({
-        where: {
-          id: tagId,
-        },
-        data: updateData,
-      });
-
-      if (!tag) throw new InternalServerErrorException('Server error');
-
-      return tag;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to update tag', error.message);
-    }
-  }
+  // async update(tagId: number, dto: TagsUpdateDto): Promise<Tags | null> {
+  //   try {
+  //     const currentTag = await this.getById(tagId);
+  //
+  //     if (!currentTag) {
+  //       throw new NotFoundException('Tag not found');
+  //     }
+  //
+  //     const updateData: Prisma.TagsUpdateInput = {};
+  //
+  //     if (dto.name !== undefined) {
+  //       updateData.name = dto.name;
+  //     }
+  //
+  //     if (dto.color !== undefined) {
+  //       updateData.color = dto.color;
+  //     }
+  //
+  //     if (dto.workoutId !== undefined) {
+  //       updateData.workout = {
+  //         connect: { id: dto.workoutId },
+  //       };
+  //     }
+  //
+  //     if (Object.keys(updateData).length === 0) {
+  //       return currentTag;
+  //     }
+  //
+  //     const tag = await this.prisma.tags.update({
+  //       where: {
+  //         id: tagId,
+  //       },
+  //       data: updateData,
+  //     });
+  //
+  //     if (!tag) throw new InternalServerErrorException('Server error');
+  //
+  //     return tag;
+  //   } catch (error) {
+  //     throw new InternalServerErrorException('Failed to update tag', error.message);
+  //   }
+  // }
 
   async delete(tagId: number): Promise<Tags | null> {
     try {
