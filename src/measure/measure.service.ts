@@ -15,49 +15,77 @@ export class MeasureService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: MeasureDto): Promise<Measure | null> {
-    const measure = await this.prisma.measure.create({
-      data: dto,
-    });
+    try {
+      const measure = await this.prisma.measure.create({
+        data: dto,
+      });
 
-    if (!measure) throw new InternalServerErrorException('Server error');
+      if (!measure) throw new InternalServerErrorException('Server error');
 
-    return measure;
+      return measure;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to get measure', error.message);
+    }
   }
 
   async getById(measureId: number): Promise<Measure | null> {
-    const measure = await this.prisma.measure.findUnique({
-      where: {
-        id: measureId,
-      },
-    });
+    try {
+      const measure = await this.prisma.measure.findUnique({
+        where: {
+          id: measureId,
+        },
+      });
 
-    if (!measure) throw new InternalServerErrorException('Server error');
+      if (!measure) throw new InternalServerErrorException('Server error');
 
-    return measure;
+      return measure;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create measure', error.message);
+    }
+  }
+
+  async getAll(): Promise<Measure[] | null> {
+    try {
+      const measure = await this.prisma.measure.findMany();
+
+      if (!measure) throw new InternalServerErrorException('Server error');
+
+      return measure;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to get measures', error.message);
+    }
   }
 
   async update(measureId: number, dto: MeasureDto): Promise<Measure | null> {
-    const measure = await this.prisma.measure.update({
-      where: {
-        id: measureId,
-      },
-      data: dto,
-    });
+    try {
+      const measure = await this.prisma.measure.update({
+        where: {
+          id: measureId,
+        },
+        data: dto,
+      });
 
-    if (!measure) throw new InternalServerErrorException('Server error');
+      if (!measure) throw new InternalServerErrorException('Server error');
 
-    return measure;
+      return measure;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update measure', error.message);
+    }
   }
 
   async delete(measureId: number): Promise<Measure | null> {
-    const measure = await this.prisma.measure.delete({
-      where: {
-        id: measureId,
-      },
-    });
+    try {
+      const measure = await this.prisma.measure.delete({
+        where: {
+          id: measureId,
+        },
+      });
 
-    if (!measure) throw new InternalServerErrorException('Server error');
+      if (!measure) throw new InternalServerErrorException('Server error');
 
-    return measure;
+      return measure;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to get measures', error.message);
+    }
   }
 }

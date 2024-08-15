@@ -14,6 +14,7 @@ import { UserDataModule } from './user-data/user-data.module';
 import { FileModule } from './file/file.module';
 import { WorkoutTypeIconsModule } from './workout-type-icons/workout-type-icons.module';
 import { WorkoutTypeModule } from './workout-type/workout-type.module';
+import { ExerciseTypeModule } from './exercise-type/exercise-type.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { WorkoutTypeModule } from './workout-type/workout-type.module';
     FileModule,
     WorkoutTypeIconsModule,
     WorkoutTypeModule,
+    ExerciseTypeModule,
   ],
   controllers: [],
   providers: [],

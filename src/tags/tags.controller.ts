@@ -41,13 +41,13 @@ export class TagsController {
     return this.tagsService.getAll(userId);
   }
 
-  // @UsePipes(new ValidationPipe())
-  // @HttpCode(200)
-  // @Auth()
-  // @Put('update/:id')
-  // async update(@Param('id') id: string, @Body() dto: TagsUpdateDto) {
-  //   return this.tagsService.update(parseInt(id), dto);
-  // }
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Put('update/:id')
+  async update(@Param('id') id: string, @Body() dto: TagsUpdateDto) {
+    return this.tagsService.update(parseInt(id), dto);
+  }
 
   @HttpCode(200)
   @Auth()
