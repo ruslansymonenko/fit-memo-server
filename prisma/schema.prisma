@@ -139,6 +139,7 @@ model Tags {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   name      String  @unique
+  color     String
   isFavorie Boolean @default(false) @map("is_favorite")
 
   user      User?    @relation(fields: [userId], references: [id])
