@@ -17,61 +17,77 @@ export class WorkoutTypeIconsService implements IWorkoutTypeIcons {
   ) {}
 
   async create(file: Express.Multer.File[]): Promise<WorkoutTypeIcons | null> {
-    if (!file) throw new BadRequestException('File not found');
+    try {
+      if (!file) throw new BadRequestException('File not found');
 
-    const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.WORKOUT_ICONS);
-    const iconPath = fileData[0].url;
+      const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.WORKOUT_ICONS);
+      const iconPath = fileData[0].url;
 
-    const newIcon = await this.prisma.workoutTypeIcons.create({
-      data: {
-        icon: iconPath,
-      },
-    });
+      const newIcon = await this.prisma.workoutTypeIcons.create({
+        data: {
+          icon: iconPath,
+        },
+      });
 
-    if (!newIcon) throw new InternalServerErrorException('Server error');
+      if (!newIcon) throw new InternalServerErrorException('Server error');
 
-    return newIcon;
+      return newIcon;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async getById(iconId: number): Promise<WorkoutTypeIcons | null> {
-    const icon = await this.prisma.workoutTypeIcons.findUnique({
-      where: {
-        id: iconId,
-      },
-    });
+    try {
+      const icon = await this.prisma.workoutTypeIcons.findUnique({
+        where: {
+          id: iconId,
+        },
+      });
 
-    if (!icon) throw new InternalServerErrorException('Server error');
+      if (!icon) throw new InternalServerErrorException('Server error');
 
-    return icon;
+      return icon;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async update(iconId: number, file: Express.Multer.File[]): Promise<WorkoutTypeIcons | null> {
-    const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.WORKOUT_ICONS);
-    const iconPath = fileData[0].url;
+    try {
+      const fileData = await this.fileService.saveFiles(file, EnumFoldersNames.WORKOUT_ICONS);
+      const iconPath = fileData[0].url;
 
-    const newIcon = await this.prisma.workoutTypeIcons.update({
-      where: {
-        id: iconId,
-      },
-      data: {
-        icon: iconPath,
-      },
-    });
+      const newIcon = await this.prisma.workoutTypeIcons.update({
+        where: {
+          id: iconId,
+        },
+        data: {
+          icon: iconPath,
+        },
+      });
 
-    if (!newIcon) throw new InternalServerErrorException('Server error');
+      if (!newIcon) throw new InternalServerErrorException('Server error');
 
-    return newIcon;
+      return newIcon;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 
   async delete(iconId: number): Promise<WorkoutTypeIcons | null> {
-    const icon = await this.prisma.workoutTypeIcons.delete({
-      where: {
-        id: iconId,
-      },
-    });
+    try {
+      const icon = await this.prisma.workoutTypeIcons.delete({
+        where: {
+          id: iconId,
+        },
+      });
 
-    if (!icon) throw new InternalServerErrorException('Server error');
+      if (!icon) throw new InternalServerErrorException('Server error');
 
-    return icon;
+      return icon;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
   }
 }
