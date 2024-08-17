@@ -34,6 +34,13 @@ export class MeasureController {
     return this.measureService.getById(parseInt(id));
   }
 
+  @HttpCode(200)
+  @Auth()
+  @Get('get-all')
+  async getAll() {
+    return this.measureService.getAll();
+  }
+
   @UsePipes(new ValidationPipe())
   @HttpCode(200)
   @Auth(EnumUserRoles.ADMIN)

@@ -45,7 +45,7 @@ model User {
   workouts      Workout[]
   workoutsTypes WorkoutType[]
   tags          Tags[]
-  exercises     Exercise[]
+  exerciseTypes ExerciseType[]
 
   @@map("user")
 }
@@ -97,8 +97,8 @@ model Workout {
   workoutType   WorkoutType? @relation(fields: [workoutTypeId], references: [id])
   workoutTypeId Int?         @map("workout_type_id")
 
-  tags      Tags[]
   exercises Exercise[]
+  tags      Tags[]
 
   @@map("workout")
 }
@@ -139,14 +139,36 @@ model Tags {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   name      String  @unique
+  color     String
   isFavorie Boolean @default(false) @map("is_favorite")
 
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    Int?     @map("user_id")
-  workout   Workout? @relation(fields: [workoutId], references: [id])
-  workoutId Int?     @map("workout_id")
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @map("user_id")
+
+  workouts Workout[]
 
   @@map("tags")
+}
+
+model ExerciseType {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  name        String  @unique
+  description String?
+
+  isFavorite Boolean @default(false) @map("is_favorite")
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?  @map("user_id")
+
+  measure   Measure? @relation(fields: [measureId], references: [id])
+  measureId Int?     @map("measure_id")
+
+  exercises Exercise[]
+
+  @@map("exercise_type")
 }
 
 model Exercise {
@@ -154,16 +176,11 @@ model Exercise {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  name        String  @unique
-  description String?
-  isFavorie   Boolean @default(false) @map("is_favorite")
-
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    Int?     @map("user_id")
   workout   Workout? @relation(fields: [workoutId], references: [id])
   workoutId Int?     @map("workout_id")
-  measure   Measure? @relation(fields: [measureId], references: [id])
-  measureId Int?     @map("measure_id")
+
+  exerciseType   ExerciseType? @relation(fields: [exerciseTypeId], references: [id])
+  exerciseTypeId Int?          @map("exercise_type_id")
 
   sets Set[]
 
@@ -188,7 +205,8 @@ model Repeat {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  value Int
+  quantity Int?
+  value    Int
 
   set   Set? @relation(fields: [setId], references: [id])
   setId Int  @map("set_id")
@@ -201,8 +219,9 @@ model Measure {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  type     EnumMeasuresTypes @unique
-  exercise Exercise[]
+  type EnumMeasuresTypes @unique
+
+  exerciseTypes ExerciseType[]
 
   @@map("measure")
 }

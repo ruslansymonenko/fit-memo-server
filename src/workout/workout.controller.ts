@@ -7,13 +7,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { WorkoutService } from './workout.service';
+import { TypeToggleTags, WorkoutService } from './workout.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import { WorkoutDto, WorkoutUpdateDto } from './dto/workout.dto';
+import { AddTagsDto } from './dto/addTags.dto';
 
 @Controller('workout')
 export class WorkoutController {
@@ -47,6 +49,18 @@ export class WorkoutController {
   @Put('update/:id')
   async update(@Param('id') id: string, @Body() dto: WorkoutUpdateDto) {
     return this.workoutService.update(parseInt(id), dto);
+  }
+
+  @UsePipes(new ValidationPipe())
+  @HttpCode(200)
+  @Auth()
+  @Put('toggle-tags/:id')
+  async toggleTags(
+    @Param('id') id: string,
+    @Query('type') type: TypeToggleTags,
+    @Body() dto: AddTagsDto,
+  ) {
+    return this.workoutService.toggleTags(parseInt(id), type, dto);
   }
 
   @HttpCode(200)
