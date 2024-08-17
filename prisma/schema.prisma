@@ -205,7 +205,7 @@ model Repeat {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  quantity Int
+  quantity Int?
   value    Int
 
   set   Set? @relation(fields: [setId], references: [id])

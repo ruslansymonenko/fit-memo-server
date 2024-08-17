@@ -55,6 +55,25 @@ export class WorkoutService implements IWorkoutService {
         },
         include: {
           tags: true,
+          exercises: {
+            include: {
+              exerciseType: {
+                include: {
+                  measure: true,
+                },
+              },
+              sets: {
+                include: {
+                  repeats: true,
+                },
+              },
+            },
+          },
+          workoutType: {
+            include: {
+              workoutTypeIcon: true,
+            },
+          },
         },
       });
 
@@ -74,6 +93,9 @@ export class WorkoutService implements IWorkoutService {
         },
         include: {
           tags: true,
+          workoutType: {
+            include: { workoutTypeIcon: true },
+          },
         },
       });
 

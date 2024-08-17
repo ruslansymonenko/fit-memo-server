@@ -36,6 +36,9 @@ export class SetService implements ISetService {
         where: {
           id: setId,
         },
+        include: {
+          repeats: true,
+        },
       });
 
       if (!set) throw new NotFoundException('Set not found');
@@ -52,6 +55,7 @@ export class SetService implements ISetService {
         where: {
           exerciseId: setId,
         },
+        include: { repeats: true },
       });
 
       if (!set) throw new NotFoundException('Server error');

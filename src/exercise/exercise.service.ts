@@ -38,6 +38,10 @@ export class ExerciseService implements IExerciseService {
         where: {
           id: exerciseId,
         },
+        include: {
+          sets: true,
+          exerciseType: true,
+        },
       });
 
       if (!exercise) throw new NotFoundException('Exercise not found');
