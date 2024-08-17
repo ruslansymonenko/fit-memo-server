@@ -131,7 +131,7 @@ export class ExerciseTypeService implements IWorkoutTypeService {
 
       return exerciseType;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to delete WorkoutType', error.message);
+      throw new InternalServerErrorException('Failed to delete exercise type', error.message);
     }
   }
 }
