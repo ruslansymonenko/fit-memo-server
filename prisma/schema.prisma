@@ -20,7 +20,7 @@ enum EnumMeasuresTypes {
 
 enum EnumWorkoutStatus {
   NEW
-  IN_PROGGRES
+  IN_PROGRESS
   DONE
 }
 
