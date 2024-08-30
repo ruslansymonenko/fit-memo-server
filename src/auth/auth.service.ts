@@ -58,7 +58,10 @@ export class AuthService implements IAuthService {
         ...tokens,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+      throw new InternalServerErrorException(
+        `Authorization error: ${error.message}`,
+        error.message,
+      );
     }
   }
 
@@ -83,34 +86,41 @@ export class AuthService implements IAuthService {
         ...tokens,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+      throw new InternalServerErrorException(
+        `Authorization error: ${error.message}`,
+        error.message,
+      );
     }
   }
 
   async getNewTokens(refreshToken: string): Promise<IAuthServiceResponse> {
-    let result;
     try {
-      result = await this.jwt.verifyAsync(refreshToken);
-    } catch (error) {
-      if (error.name === 'JsonWebTokenError') {
-        throw new UnauthorizedException('Invalid token');
-      } else {
-        throw error;
+      let result;
+      try {
+        result = await this.jwt.verifyAsync(refreshToken);
+      } catch (error) {
+        if (error.name === 'JsonWebTokenError') {
+          throw new UnauthorizedException('Invalid token');
+        } else {
+          throw error;
+        }
       }
+
+      if (!result) throw new UnauthorizedException('Invalid token');
+
+      const isUser = await this.userService.findById(result.id);
+
+      if (!isUser) throw new NotFoundException('User not found');
+
+      const tokens = await this.createTokens(isUser.id);
+
+      return {
+        user: this.returnUserFields(isUser),
+        ...tokens,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Server error', error.message);
     }
-
-    if (!result) throw new UnauthorizedException('Invalid token');
-
-    const isUser = await this.userService.findById(result.id);
-
-    if (!isUser) throw new NotFoundException('User not found');
-
-    const tokens = await this.createTokens(isUser.id);
-
-    return {
-      user: this.returnUserFields(isUser),
-      ...tokens,
-    };
   }
 
   async createTokens(userId: number): Promise<ITokens> {
@@ -123,7 +133,7 @@ export class AuthService implements IAuthService {
 
       return { accessToken, refreshToken };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+      throw new InternalServerErrorException('Server error', error.message);
     }
   }
 
@@ -169,7 +179,7 @@ export class AuthService implements IAuthService {
 
       return user;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+      throw new InternalServerErrorException('Wrong user data', error.message);
     }
   }
 

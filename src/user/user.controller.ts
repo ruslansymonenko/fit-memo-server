@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Param,
-  Put,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
@@ -20,7 +11,7 @@ export class UserController {
   @Auth()
   @Get('by-id')
   async getById(@CurrentUser('id') id: number) {
-    const { password, ...user } = await this.userService.findById(id);
+    const { password, userRole, ...user } = await this.userService.findById(id);
 
     return { ...user };
   }
