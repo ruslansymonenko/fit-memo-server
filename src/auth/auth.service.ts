@@ -45,22 +45,6 @@ export class AuthService implements IAuthService {
     private userService: UserService,
   ) {}
 
-  async verifyTokenExpiredDate(token: string): Promise<boolean> {
-    try {
-      const payload = await this.jwt.verifyAsync(token);
-
-      const currentTime = Math.floor(Date.now() / 1000);
-
-      if (payload.exp < currentTime) {
-        throw new UnauthorizedException('Token has expired');
-      }
-
-      return payload;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-  }
-
   async login(dto: AuthDto): Promise<IAuthServiceResponse> {
     try {
       const user = await this.validateUser(dto);
