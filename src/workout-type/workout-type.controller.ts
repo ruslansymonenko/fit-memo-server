@@ -13,7 +13,7 @@ import {
 import { WorkoutTypeService } from './workout-type.service';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { WorkoutTypeDto } from './dto/workout-type.dto';
+import { WorkoutTypeDto, WorkoutUpdateTypeDto } from './dto/workout-type.dto';
 
 @Controller('workout-type')
 export class WorkoutTypeController {
@@ -45,7 +45,7 @@ export class WorkoutTypeController {
   @HttpCode(200)
   @Auth()
   @Put('update/:id')
-  async update(@Param('id') id: string, @Body() dto: WorkoutTypeDto) {
+  async update(@Param('id') id: string, @Body() dto: WorkoutUpdateTypeDto) {
     return this.workoutTypeService.update(parseInt(id), dto);
   }
 

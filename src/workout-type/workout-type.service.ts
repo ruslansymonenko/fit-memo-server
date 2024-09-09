@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { Prisma, WorkoutType } from '@prisma/client';
-import { WorkoutTypeDto } from './dto/workout-type.dto';
+import { WorkoutTypeDto, WorkoutUpdateTypeDto } from './dto/workout-type.dto';
 
 interface IWorkoutTypeService {
   create(userId: number, dto: WorkoutTypeDto): Promise<WorkoutType | null>;
@@ -44,6 +44,9 @@ export class WorkoutTypeService implements IWorkoutTypeService {
         where: {
           id: workoutTypeId,
         },
+        include: {
+          workoutTypeIcon: true,
+        },
       });
 
       if (!workoutType) throw new InternalServerErrorException('Workout type not found');
@@ -60,6 +63,9 @@ export class WorkoutTypeService implements IWorkoutTypeService {
         where: {
           userId: userId,
         },
+        include: {
+          workoutTypeIcon: true,
+        },
       });
 
       if (!workoutType) throw new InternalServerErrorException('Server error');
@@ -70,7 +76,7 @@ export class WorkoutTypeService implements IWorkoutTypeService {
     }
   }
 
-  async update(workoutTypeId: number, dto: WorkoutTypeDto): Promise<WorkoutType | null> {
+  async update(workoutTypeId: number, dto: WorkoutUpdateTypeDto): Promise<WorkoutType | null> {
     try {
       const currentWorkoutType = await this.getById(workoutTypeId);
 

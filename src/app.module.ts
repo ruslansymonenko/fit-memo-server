@@ -15,6 +15,8 @@ import { FileModule } from './file/file.module';
 import { WorkoutTypeIconsModule } from './workout-type-icons/workout-type-icons.module';
 import { WorkoutTypeModule } from './workout-type/workout-type.module';
 import { ExerciseTypeModule } from './exercise-type/exercise-type.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -22,6 +24,10 @@ import { ExerciseTypeModule } from './exercise-type/exercise-type.module';
     HttpModule.register({
       baseURL: CLIENT_URL,
       withCredentials: true,
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
     }),
     UserModule,
     AuthModule,
