@@ -5,6 +5,8 @@ import { EnumFoldersNames, FileService } from '../file/file.service';
 
 interface IWorkoutTypeIcons {
   create(file: Express.Multer.File[]): Promise<WorkoutTypeIcons | null>;
+  getById(iconId: number): Promise<WorkoutTypeIcons | null>;
+  getAll(): Promise<WorkoutTypeIcons[] | null>;
   update(iconId: number, file: Express.Multer.File[]): Promise<WorkoutTypeIcons | null>;
   delete(iconId: number): Promise<WorkoutTypeIcons | null>;
 }
@@ -34,6 +36,18 @@ export class WorkoutTypeIconsService implements IWorkoutTypeIcons {
       return newIcon;
     } catch (error) {
       throw new InternalServerErrorException('Failed to create WorkoutType', error.message);
+    }
+  }
+
+  async getAll(): Promise<WorkoutTypeIcons[] | null> {
+    try {
+      const workoutTypeIcons = await this.prisma.workoutTypeIcons.findMany();
+
+      if (!workoutTypeIcons) throw new InternalServerErrorException('Server error');
+
+      return workoutTypeIcons;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to get Workout Types', error.message);
     }
   }
 

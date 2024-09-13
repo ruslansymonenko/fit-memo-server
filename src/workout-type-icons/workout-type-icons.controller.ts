@@ -28,6 +28,13 @@ export class WorkoutTypeIconsController {
 
   @HttpCode(200)
   @Auth()
+  @Get('get-all')
+  async geAll() {
+    return this.workoutTypeIconsService.getAll();
+  }
+
+  @HttpCode(200)
+  @Auth()
   @Get('by-id/:id')
   async getById(@Param('id') id: string) {
     return this.workoutTypeIconsService.getById(parseInt(id));
