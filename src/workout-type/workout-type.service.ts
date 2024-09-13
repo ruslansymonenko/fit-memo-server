@@ -16,6 +16,7 @@ export class WorkoutTypeService implements IWorkoutTypeService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: number, dto: WorkoutTypeDto): Promise<WorkoutType | null> {
+    console.log(dto);
     try {
       let workoutTypeDefaultIcon: number = dto.iconId ? dto.iconId : 1;
 
