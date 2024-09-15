@@ -1,5 +1,5 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
-import { Prisma, Workout } from '@prisma/client';
+import { EnumWorkoutStatus, Prisma, Workout } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { WorkoutDto, WorkoutUpdateDto } from './dto/workout.dto';
 import { AddTagsDto } from './dto/addTags.dto';
@@ -20,13 +20,15 @@ export class WorkoutService implements IWorkoutService {
   constructor(private prisma: PrismaService) {}
 
   async create(userId: number, dto: WorkoutDto): Promise<Workout | null> {
+    let defaultStatus = EnumWorkoutStatus.NEW;
+
     try {
       const workout = await this.prisma.workout.create({
         data: {
           name: dto.name,
           date: dto.date,
-          status: dto.status,
-          duration: dto.duration,
+          status: dto.status ? dto.status : defaultStatus,
+          duration: dto.duration ? dto.duration : 0,
           user: {
             connect: { id: userId },
           },

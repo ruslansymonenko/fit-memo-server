@@ -34,11 +34,13 @@ export class WorkoutDto {
   })
   date: Date;
 
+  @IsOptional()
   @IsEnum(EnumWorkoutStatus, {
     message: `Status should be one of: ${workoutStatuses}`,
   })
   status: EnumWorkoutStatus;
 
+  @IsOptional()
   @IsInt({
     message: 'Duration must be an integer',
   })
