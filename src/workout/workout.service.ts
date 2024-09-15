@@ -38,6 +38,9 @@ export class WorkoutService implements IWorkoutService {
         },
         include: {
           tags: true,
+          workoutType: {
+            include: { workoutTypeIcon: true },
+          },
         },
       });
 
