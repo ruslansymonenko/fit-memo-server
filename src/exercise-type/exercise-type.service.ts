@@ -80,6 +80,7 @@ export class ExerciseTypeService implements IWorkoutTypeService {
   }
 
   async update(exerciseTypeId: number, dto: ExerciseTypeUpdateDto): Promise<ExerciseType | null> {
+    console.log(dto);
     try {
       const currentExerciseType = await this.getById(exerciseTypeId);
 
@@ -91,6 +92,12 @@ export class ExerciseTypeService implements IWorkoutTypeService {
 
       if (dto.name !== undefined) {
         updateData.name = dto.name;
+      }
+
+      if (dto.measureId !== undefined) {
+        updateData.measure = {
+          connect: { id: dto.measureId },
+        };
       }
 
       if (dto.isFavorite !== undefined) {
