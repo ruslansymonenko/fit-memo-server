@@ -12,6 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { EnumWorkoutStatus } from '@prisma/client';
+import { Type } from 'class-transformer';
 
 const workoutStatuses: string = Object.values(EnumWorkoutStatus).join(', ');
 
@@ -68,6 +69,7 @@ export class WorkoutUpdateDto {
   isFavorite: boolean;
 
   @IsOptional()
+  @Type(() => Date)
   @IsDate({
     message: 'Date should be a date',
   })

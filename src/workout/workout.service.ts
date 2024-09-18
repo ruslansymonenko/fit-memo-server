@@ -165,6 +165,9 @@ export class WorkoutService implements IWorkoutService {
         data: updateData,
         include: {
           tags: true,
+          workoutType: {
+            include: { workoutTypeIcon: true },
+          },
         },
       });
 
