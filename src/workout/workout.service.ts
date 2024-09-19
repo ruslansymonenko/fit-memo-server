@@ -165,8 +165,24 @@ export class WorkoutService implements IWorkoutService {
         data: updateData,
         include: {
           tags: true,
+          exercises: {
+            include: {
+              exerciseType: {
+                include: {
+                  measure: true,
+                },
+              },
+              sets: {
+                include: {
+                  repeats: true,
+                },
+              },
+            },
+          },
           workoutType: {
-            include: { workoutTypeIcon: true },
+            include: {
+              workoutTypeIcon: true,
+            },
           },
         },
       });
