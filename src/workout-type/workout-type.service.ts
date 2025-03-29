@@ -27,6 +27,9 @@ export class WorkoutTypeService implements IWorkoutTypeService {
           },
           workoutTypeIcon: { connect: { id: workoutTypeDefaultIcon } },
         },
+        include: {
+          workoutTypeIcon: true,
+        },
       });
 
       if (!workoutType)
@@ -109,6 +112,9 @@ export class WorkoutTypeService implements IWorkoutTypeService {
           id: workoutTypeId,
         },
         data: updateData,
+        include: {
+          workoutTypeIcon: true,
+        },
       });
 
       if (!workoutType) throw new InternalServerErrorException('Server error');

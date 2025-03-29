@@ -11,9 +11,12 @@ export class WorkoutTypeDto {
   isFavorite: boolean;
 
   @IsOptional()
-  @IsString({
-    message: 'Workout iconId should be number',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Workout iconId should be number',
+    },
+  )
   iconId: number;
 }
 
